@@ -1,0 +1,17 @@
+from model.model import Model
+
+model = Model()
+model.buildGraph()
+
+print("Numero nodi: ", model.getNumNodes())
+print("Numero archi: ", model.getNumEdges())
+
+artist, degree = model.getArtistWithMaxDegree()
+print("Artista con grado massimo:", artist, degree)
+
+artist, weight_sum = model.getArtistWithMaxWeightSum()
+print("Artista con somma pesi massima:", artist, weight_sum)
+
+print("\nTop 10 archi:")
+for a1, a2, data in model.getTop10Edges():
+    print(a1, "-", a2, "- peso:", data["weight"])
