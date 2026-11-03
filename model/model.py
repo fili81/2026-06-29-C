@@ -1,10 +1,15 @@
 import networkx as nx
 from database.DAO import DAO
+import copy
 
 class Model:
     def __init__(self):
         self.graph = nx.Graph()
         self.artists = []
+
+        # per ricorsione
+        self.bestGroup = []
+        self.maxTracks = 0
 
     def buildGraph(self):
         self.graph.clear()
@@ -58,6 +63,69 @@ class Model:
             )
         )
         return edges[:10]
+
+    # per ricorsione
+    def getBestGroup(self, starting_artist, N):
+
+        self.bestGroup = []
+        self.maxTracks = 0
+
+        parziale = [starting_artist]
+
+        self._ricorsione(parziale, N)
+
+        return self.bestGroup, self.maxTracks
+
+    def _ricorsione(self, parziale, N):
+
+        if len(parziale) == N:
+
+            totalTracks = self._getTotalTracks(parziale)
+            if totalTracks > self.maxTracks:
+                self.maxTracks = totalTracks
+                self.bestGroup = copy.deepcopy(parziale)
+            return
+
+        for candidate in self.graph.nodes:
+            if candidate in parziale:
+                continue
+
+            adjacent = any(
+                self.graph.has_edge(candidate, existing)
+                for existing in parziale
+            )
+            if not adjacent:
+                continue
+
+            blocked = any(
+                self.graph.has_edge(candidate, existing)
+                and self.graph[candidate][existing]["weight"] == 1
+                for existing in parziale
+            )
+            if blocked:
+                continue
+
+            # scelgo
+            parziale.append(candidate)
+
+            # continuo
+            self._ricorsione(parziale, N)
+
+            # torno indietro
+            parziale.pop()
+
+
+    def _getTotalTracks(self, artists):
+        total = 0
+
+        for artist in artists:
+            total += len(artist.Tracks)
+        return total
+
+
+
+
+
 
 
 
